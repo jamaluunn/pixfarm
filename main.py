@@ -1,6 +1,5 @@
 import requests
 import time
-import datetime
 from colorama import init, Fore, Style
 
 # Inisialisasi colorama
@@ -36,44 +35,53 @@ def countdown(seconds):
         time.sleep(1)
         seconds -= 1
 
-# Fungsi utama untuk menjalankan bot
-def run_bot(auth_token, claim_interval):
+# Fungsi utama untuk menjalankan bot untuk satu akun
+def run_bot_for_account(auth_token):
+    user_data = get_user_data(auth_token)
+
+    print(f"\n{Style.BRIGHT}{Fore.YELLOW}{'='*40}")
+    print(f"{Style.BRIGHT}{Fore.CYAN}{' '*15}PixelFarm Bot")
+    print(f"{Style.BRIGHT}{Fore.CYAN}{' '*10}From https://github.com/himiko3939")
+    print(f"{Style.BRIGHT}{Fore.YELLOW}{'='*40}")
+    print(f"\n{Style.BRIGHT}{Fore.GREEN}{'~'*40}")
+    print(f"{Style.BRIGHT}{Fore.GREEN}Telegram ID       : {Fore.WHITE}{user_data['data']['telegram_id']}")
+    print(f"{Style.BRIGHT}{Fore.GREEN}Telegram Username : {Fore.WHITE}{user_data['data']['telegram_username']}")
+    print(f"{Style.BRIGHT}{Fore.GREEN}Gem Amount        : {Fore.WHITE}{user_data['data']['gem_amount']}")
+    print(f"{Style.BRIGHT}{Fore.GREEN}Fruit Total       : {Fore.WHITE}{user_data['data']['crops'][0]['fruit_total']}")
+    print(f"{Style.BRIGHT}{Fore.GREEN}Tree Type         : {Fore.WHITE}{user_data['data']['crops'][0]['tree_type']}")
+    print(f"{Style.BRIGHT}{Fore.GREEN}{'~'*40}")
+
+    claim_response = claim(auth_token)
+    
+    if claim_response['data']:
+        print(f"\n{Style.BRIGHT}{Fore.YELLOW}Claim Response: {Fore.GREEN}Sukses melakukan klaim!")
+        new_user_data = get_user_data(auth_token)
+        claimed_fruit = new_user_data['data']['crops'][0]['fruit_total'] - user_data['data']['crops'][0]['fruit_total']
+        total_fruit = new_user_data['data']['crops'][0]['fruit_total']
+        print(f"{Style.BRIGHT}{Fore.YELLOW}Jumlah fruit yang diklaim : {Fore.WHITE}{claimed_fruit}")
+        print(f"{Style.BRIGHT}{Fore.YELLOW}Jumlah total fruit setelah klaim : {Fore.WHITE}{total_fruit}")
+    else:
+        print(f"\n{Style.BRIGHT}{Fore.RED}Claim Response: {Fore.RED}Gagal melakukan klaim")
+
+# Fungsi utama untuk menjalankan bot untuk semua akun
+def run_bot(auth_tokens, claim_interval):
     while True:
-        user_data = get_user_data(auth_token)
-        
-        print(f"\n{Fore.YELLOW}{'='*40}")
-        print(f"{Fore.YELLOW}PixelFarm Bot")
-        print(f"{Fore.YELLOW}Channel: https://t.me/ugdairdrop")
-        print(f"{Fore.YELLOW}{'='*40}")
-        print(f"\n{Fore.YELLOW}{'='*40}")
-        print(f"{Fore.GREEN}Telegram ID       : {user_data['data']['telegram_id']}")
-        print(f"{Fore.GREEN}Telegram Username : {user_data['data']['telegram_username']}")
-        print(f"{Fore.GREEN}Gem Amount        : {user_data['data']['gem_amount']}")
-        print(f"{Fore.GREEN}Fruit Total       : {user_data['data']['crops'][0]['fruit_total']}")
-        print(f"{Fore.GREEN}Tree Type         : {user_data['data']['crops'][0]['tree_type']}")
-        print(f"{Fore.YELLOW}{'='*40}")
+        for auth_token in auth_tokens:
+            try:
+                run_bot_for_account(auth_token)
+            except Exception as e:
+                print(f"{Style.BRIGHT}{Fore.RED}Error: {e}")
+            # Jeda 10 detik setelah setiap akun
+            print(f"\n{Style.BRIGHT}{Fore.BLUE}Menunggu 10 detik sebelum akun berikutnya...")
+            time.sleep(10)
+        print(f"\n{Style.BRIGHT}{Fore.GREEN}{'-'*40}")
+        print(f"{Style.BRIGHT}{Fore.BLUE}Menunggu untuk klaim berikutnya...")
+        countdown(claim_interval)
+        print(f"\n{Style.BRIGHT}{Fore.GREEN}{'-'*40}")
 
-        claim_response = claim(auth_token)
-        
-        if claim_response['data']:
-            print(f"\n{Fore.YELLOW}Claim Response: Sukses melakukan klaim")
-            new_user_data = get_user_data(auth_token)
-            claimed_fruit = new_user_data['data']['crops'][0]['fruit_total'] - user_data['data']['crops'][0]['fruit_total']
-            total_fruit = new_user_data['data']['crops'][0]['fruit_total']
-            print(f"{Fore.YELLOW}Jumlah fruit yang diklaim : {claimed_fruit}")
-            print(f"{Fore.YELLOW}Jumlah total fruit setelah klaim : {total_fruit}")
-        else:
-            print(f"\n{Fore.RED}Claim Response: Gagal melakukan klaim")
-        
-        # Hitung mundur selama 6 jam (21600 detik) sebelum klaim berikutnya
-        print(f"\n{Fore.GREEN}{'-'*40}")
-        print(f"{Fore.BLUE}Menunggu untuk klaim berikutnya...")
-        countdown(21600)
-        print(f"\n{Fore.GREEN}{'-'*40}")
-
-# Membaca auth token dari file teks
+# Membaca auth tokens dari file teks
 with open('data.txt', 'r') as file:
-    auth_token = file.read().strip()
+    auth_tokens = [line.strip() for line in file]
 
 # Jalankan bot dengan interval klaim setiap 6 jam
-run_bot(auth_token, 21600)
+run_bot(auth_tokens, 21600)
