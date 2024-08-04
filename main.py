@@ -41,7 +41,7 @@ def run_bot_for_account(auth_token):
 
     print(f"\n{Style.BRIGHT}{Fore.YELLOW}{'='*40}")
     print(f"{Style.BRIGHT}{Fore.CYAN}{' '*15}PixelFarm Bot")
-    print(f"{Style.BRIGHT}{Fore.CYAN}{' '*10}From https://github.com/himiko3939")
+    print(f"{Style.BRIGHT}{Fore.CYAN}{' '*10}From github.com/himiko3939")
     print(f"{Style.BRIGHT}{Fore.YELLOW}{'='*40}")
     print(f"\n{Style.BRIGHT}{Fore.GREEN}{'~'*40}")
     print(f"{Style.BRIGHT}{Fore.GREEN}Telegram ID       : {Fore.WHITE}{user_data['data']['telegram_id']}")
